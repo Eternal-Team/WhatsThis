@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Terraria;
+﻿using Terraria;
 
 namespace WhatsThis
 {
@@ -51,9 +49,5 @@ namespace WhatsThis
 				default: return false;
 			}
 		}
-
-		public static bool ContainsAll<T>(this List<T> subset, List<T> superset) => superset.Except(subset).Any();
-
-		public static bool IsEqual<T>(this List<T> list1, List<T> list2) => list1.All(list2.Contains) && list1.Count == list2.Count;
 	}
 }

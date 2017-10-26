@@ -182,24 +182,24 @@ namespace WhatsThis
 				else BrowserUI.findLock = false;
 			}
 
-			if (Main.keyState.IsKeyDown(Keys.E))
-			{
-				if (!browserLock)
-				{
-					if (RecipeUI.visible && RecipeUI.wasInBrowser)
-					{
-						RecipeUI.visible = false;
-						BrowserUI.visible = true;
-						RecipeUI.wasInBrowser = false;
-						browserLock = true;
-						return;
-					}
+			//if (Main.keyState.IsKeyDown(Keys.E))
+			//{
+			//	if (!browserLock)
+			//	{
+			//		if (RecipeUI.visible && RecipeUI.wasInBrowser)
+			//		{
+			//			RecipeUI.visible = false;
+			//			BrowserUI.visible = true;
+			//			RecipeUI.wasInBrowser = false;
+			//			browserLock = true;
+			//			return;
+			//		}
 
-					BrowserUI.Toggle();
-					browserLock = true;
-				}
-			}
-			else browserLock = false;
+			//		BrowserUI.Toggle();
+			//		browserLock = true;
+			//	}
+			//}
+			//else browserLock = false;
 
 			if (RecipeUI != null)
 			{
