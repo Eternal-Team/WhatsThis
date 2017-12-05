@@ -1,7 +1,4 @@
-﻿using BaseLib.Elements;
-using BaseLib.UI;
-using BaseLib.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,6 +8,9 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.Graphics;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TheOneLibrary.Base.UI;
+using TheOneLibrary.UI.Elements;
+using TheOneLibrary.Utility;
 
 namespace WhatsThis.UI
 {

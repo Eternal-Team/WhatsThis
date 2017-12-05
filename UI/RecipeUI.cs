@@ -1,17 +1,15 @@
-﻿using System.CodeDom.Compiler;
-using BaseLib.Elements;
-using BaseLib.UI;
-using BaseLib.Utility;
-using Microsoft.Xna.Framework;
-using RecipeLib.Recipe;
+﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using RecipeLib;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TheOneLibrary.Base.UI;
+using TheOneLibrary.Recipe;
+using TheOneLibrary.UI.Elements;
+using TheOneLibrary.Utility;
 
 namespace WhatsThis.UI
 {

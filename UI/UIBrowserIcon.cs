@@ -1,5 +1,4 @@
-﻿using BaseLib.Elements;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
@@ -8,6 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
+using TheOneLibrary.UI.Elements;
 
 namespace WhatsThis.UI
 {

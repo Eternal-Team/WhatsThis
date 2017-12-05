@@ -1,8 +1,5 @@
-﻿using BaseLib.Utility;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using RecipeLib;
-using RecipeLib.Recipe;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
@@ -10,6 +7,8 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 using Terraria.UI;
+using TheOneLibrary.Recipe;
+using TheOneLibrary.Utility;
 using WhatsThis.UI;
 
 namespace WhatsThis
@@ -41,7 +40,7 @@ namespace WhatsThis
 				AutoloadSounds = true
 			};
 		}
-		
+
 		public override void Load()
 		{
 			Instance = this;
