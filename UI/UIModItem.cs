@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
@@ -26,7 +26,7 @@ namespace WhatsThis.UI
 			panel.Height.Precent = 1;
 			panel.BackgroundColor = BaseUI.panelColor;
 			panel.SetPadding(0);
-			base.Append(panel);
+			Append(panel);
 
 			uiText.SetText(mod.DisplayName);
 			uiText.Center();

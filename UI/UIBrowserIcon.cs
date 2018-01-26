@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -42,10 +42,6 @@ namespace WhatsThis.UI
 
 				Main.PlaySound(SoundID.Coins);
 			}
-			else
-			{
-				// Recipe mode - show recipe
-			}
 		}
 
 		public override void RightClick(UIMouseEvent evt)
@@ -59,53 +55,51 @@ namespace WhatsThis.UI
 
 				Main.PlaySound(SoundID.Coins);
 			}
-			else
-			{
-				// Recipe mode - show usage
-			}
 		}
 
-		public override int CompareTo(object obj)
-		{
-			UIBrowserIcon other = obj as UIBrowserIcon;
+		//public override int CompareTo(object obj)
+		//{
+		//	UIBrowserIcon other = obj as UIBrowserIcon;
 
-			switch (WhatsThis.Instance.BrowserUI.sortMode)
-			{
-				case SortMode.AZ: return string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
-				case SortMode.ZA: return -string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
-				case SortMode.TypeAsc: return index.CompareTo(other.index);
-				case SortMode.TypeDesc: return -index.CompareTo(other.index);
-				default: return index.CompareTo(other.index); ;
-			}
-		}
+		//	switch (WhatsThis.Instance.BrowserUI.sortMode)
+		//	{
+		//		case SortMode.AZ: return string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
+		//		case SortMode.ZA: return -string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
+		//		case SortMode.TypeAsc: return index.CompareTo(other.index);
+		//		case SortMode.TypeDesc: return -index.CompareTo(other.index);
+		//		default:
+		//			return index.CompareTo(other.index);
+		//			;
+		//	}
+		//}
 
-		public override bool PassFilters()
-		{
-			bool result = true;
+		//public override bool PassFilters()
+		//{
+		//	bool result = true;
 
-			if (WhatsThis.Instance.BrowserUI.currentMods.Count > 0) result &= item.modItem != null && WhatsThis.Instance.BrowserUI.currentMods.Contains(item.modItem.mod);
+		//	if (WhatsThis.Instance.BrowserUI.currentMods.Count > 0) result &= item.modItem != null && WhatsThis.Instance.BrowserUI.currentMods.Contains(item.modItem.mod);
 
-			if (WhatsThis.Instance.BrowserUI.currentCategories.Count > 0) result &= WhatsThis.Instance.BrowserUI.currentCategories.Count(category => Utility.ValidItem(item, category)) > 0;
+		//	if (WhatsThis.Instance.BrowserUI.currentCategories.Count > 0) result &= WhatsThis.Instance.BrowserUI.currentCategories.Count(category => Utility.ValidItem(item, category)) > 0;
 
-			if (WhatsThis.Instance.BrowserUI.inputItems.GetText().Length > 0)
-			{
-				if (WhatsThis.Instance.BrowserUI.searchName)
-				{
-					if (WhatsThis.Instance.BrowserUI.caseSensitive) result &= WhatsThis.Instance.BrowserUI.regex.Matches(item.HoverName).Count > 0;
-					else result &= WhatsThis.Instance.BrowserUI.regex.Matches(item.HoverName.ToLower()).Count > 0;
-				}
-				else
-				{
-					string tooltip = "";
-					for (int i = 0; i < item.ToolTip.Lines; i++) tooltip += item.ToolTip.GetLine(i);
+		//	if (WhatsThis.Instance.BrowserUI.inputItems.GetText().Length > 0)
+		//	{
+		//		if (WhatsThis.Instance.BrowserUI.searchName)
+		//		{
+		//			if (WhatsThis.Instance.BrowserUI.caseSensitive) result &= WhatsThis.Instance.BrowserUI.regex.Matches(item.HoverName).Count > 0;
+		//			else result &= WhatsThis.Instance.BrowserUI.regex.Matches(item.HoverName.ToLower()).Count > 0;
+		//		}
+		//		else
+		//		{
+		//			string tooltip = "";
+		//			for (int i = 0; i < item.ToolTip.Lines; i++) tooltip += item.ToolTip.GetLine(i);
 
-					if (WhatsThis.Instance.BrowserUI.caseSensitive) result &= WhatsThis.Instance.BrowserUI.regex.Matches(tooltip).Count > 0;
-					else result &= WhatsThis.Instance.BrowserUI.regex.Matches(tooltip.ToLower()).Count > 0;
-				}
-			}
+		//			if (WhatsThis.Instance.BrowserUI.caseSensitive) result &= WhatsThis.Instance.BrowserUI.regex.Matches(tooltip).Count > 0;
+		//			else result &= WhatsThis.Instance.BrowserUI.regex.Matches(tooltip.ToLower()).Count > 0;
+		//		}
+		//	}
 
-			return result;
-		}
+		//	return result;
+		//}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{

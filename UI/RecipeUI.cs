@@ -1,6 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Map;
@@ -15,8 +15,6 @@ namespace WhatsThis.UI
 {
 	public class RecipeUI : BaseUI
 	{
-		public bool backLock = false;
-
 		public static Stack<ItemRecipe> recipeHistory = new Stack<ItemRecipe>();
 
 		public UIText textTile = new UIText("Player");
@@ -51,6 +49,7 @@ namespace WhatsThis.UI
 			Append(panelMain);
 
 			#region Heading
+
 			textTile.HAlign = 0.5f;
 			textTile.Top.Pixels = 16;
 			panelMain.Append(textTile);
@@ -68,6 +67,7 @@ namespace WhatsThis.UI
 			buttonTileForward.Top.Pixels = 8;
 			buttonTileForward.OnClick += TileForward;
 			panelMain.Append(buttonTileForward);
+
 			#endregion
 
 			panelRecipe.Width.Set(-16, 1);
@@ -217,7 +217,6 @@ namespace WhatsThis.UI
 
 		public void GoBack()
 		{
-
 		}
 
 		public override void Update(GameTime gameTime)

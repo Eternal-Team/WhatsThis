@@ -1,12 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 using Terraria.UI;
+using TheOneLibrary.Base;
 using TheOneLibrary.Recipe;
 using TheOneLibrary.Utility;
 using WhatsThis.UI;
@@ -15,7 +20,9 @@ namespace WhatsThis
 {
 	public class WhatsThis : Mod
 	{
-		public static WhatsThis Instance;
+		[Null] public static WhatsThis Instance;
+
+		public const string TexturePath = "WhatsThis/Textures/";
 
 		public BrowserUI BrowserUI;
 		public UserInterface IBrowserUI;
@@ -23,12 +30,16 @@ namespace WhatsThis
 		public RecipeUI RecipeUI;
 		public UserInterface IRecipeUI;
 
-		public static ModHotKey OpenBrowser;
+		[Null] public static ModHotKey OpenBrowser;
+		[Null] public static ModHotKey ShowRecipe;
+		[Null] public static ModHotKey ShowUsage;
+		[Null] public static ModHotKey FindItem;
+		[Null] public static ModHotKey PrevRecipe;
+
+		[Null] public static List<Texture2D> textureSortMode;
 
 		internal int timer;
 		internal List<Point16> foundContainers = new List<Point16>();
-
-		private bool browserLock;
 
 		public WhatsThis()
 		{
@@ -45,18 +56,25 @@ namespace WhatsThis
 		{
 			Instance = this;
 
-			OpenBrowser = RegisterHotKey("Open Browser", Keys.Add.ToString());
+			OpenBrowser = this.Register("Open Browser", Keys.OemCloseBrackets);
+			ShowRecipe = this.Register("Show Recipe", Keys.R);
+			ShowUsage = this.Register("Show Usage", Keys.U);
+			FindItem = this.Register("Find Item in containers", Keys.F);
+			PrevRecipe = this.Register("Previous recipe", Keys.Back);
 
 			if (!Main.dedServ)
 			{
+				textureSortMode = new List<Texture2D>();
+				for (int i = 0; i < 4; i++) textureSortMode.Add(ModLoader.GetTexture(TexturePath + "SortMode_" + i));
+
+				IBrowserUI = new UserInterface();
 				BrowserUI = new BrowserUI();
 				BrowserUI.Activate();
-				IBrowserUI = new UserInterface();
 				IBrowserUI.SetState(BrowserUI);
 
+				IRecipeUI = new UserInterface();
 				RecipeUI = new RecipeUI();
 				RecipeUI.Activate();
-				IRecipeUI = new UserInterface();
 				IRecipeUI.SetState(RecipeUI);
 			}
 		}
@@ -78,7 +96,9 @@ namespace WhatsThis
 
 		public override void Unload()
 		{
-			Instance = null;
+			this.UnloadNullableTypes();
+
+			GC.Collect();
 		}
 
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -90,126 +110,55 @@ namespace WhatsThis
 			{
 				if (BrowserUI.visible)
 				{
-					layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
-					"WhatsThis: Browser",
-					delegate
-					{
-						IBrowserUI.Update(Main._drawInterfaceGameTime);
-						BrowserUI.Draw(Main.spriteBatch);
+					layers.Insert(InventoryIndex + 1, new LegacyGameInterfaceLayer(
+						"WhatsThis: Browser",
+						delegate
+						{
+							IBrowserUI.Update(Main._drawInterfaceGameTime);
+							BrowserUI.Draw(Main.spriteBatch);
 
-						return true;
-					}, InterfaceScaleType.UI));
+							return true;
+						}, InterfaceScaleType.UI));
 				}
 
 				if (RecipeUI.visible)
 				{
 					layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
-					"WhatsThis: Recipe",
-					delegate
-					{
-						IRecipeUI.Update(Main._drawInterfaceGameTime);
-						RecipeUI.Draw(Main.spriteBatch);
+						"WhatsThis: Recipe",
+						delegate
+						{
+							IRecipeUI.Update(Main._drawInterfaceGameTime);
+							RecipeUI.Draw(Main.spriteBatch);
 
-						return true;
-					}, InterfaceScaleType.UI));
+							return true;
+						}, InterfaceScaleType.UI));
 				}
 			}
 
 			if (SmartIndex != -1)
 			{
-				layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
-					"WhatsThis: ContainerOverlay",
-					delegate
-					{
-						if (--timer > 0)
-						{
-							foreach (Point16 position in foundContainers)
-							{
-								Tile tile = Main.tile[position.X, position.Y];
-								TileObjectData data = TileObjectData.GetTileData(tile.type, 0);
+				// Postdraw tiles
+				//layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
+				//    "WhatsThis: ContainerOverlay",
+				//    delegate
+				//    {
+				//        if (--timer > 0)
+				//        {
+				//            foreach (Point16 position in foundContainers)
+				//            {
+				//                Tile tile = Main.tile[position.X, position.Y];
+				//                TileObjectData data = TileObjectData.GetTileData(tile.type, 0);
 
-								if (data != null)
-								{
-									Main.spriteBatch.DrawOutline(position, position + new Point16(data.Width - 1, data.Height - 1), Color.Goldenrod * (timer / 300f), 4);
-								}
-							}
-						}
+				//                if (data != null)
+				//                {
+				//                    Main.spriteBatch.DrawOutline(position, position + new Point16(data.Width - 1, data.Height - 1), Color.Goldenrod * (timer / 300f), 4);
+				//                }
+				//            }
+				//        }
 
-						return true;
-					}));
+				//        return true;
+				//    }));
 			}
-		}
-
-		public override void PostUpdateInput()
-		{
-			if (!Main.HoverItem.IsAir)
-			{
-				if (Main.keyState.IsKeyDown(Keys.R) && Main.HoverItem.HasRecipes())
-				{
-					if (!BrowserUI.recipeLock)
-					{
-						if (BrowserUI.visible)
-						{
-							BrowserUI.visible = false;
-							RecipeUI.wasInBrowser = true;
-						}
-						if (!RecipeUI.visible) RecipeUI.Toggle();
-						RecipeUI.DisplayRecipe(Main.HoverItem);
-					}
-
-					BrowserUI.recipeLock = true;
-				}
-				else BrowserUI.recipeLock = false;
-				if (Main.keyState.IsKeyDown(Keys.U) && Main.HoverItem.HasUsages())
-				{
-					if (!BrowserUI.usageLock)
-					{
-						if (BrowserUI.visible)
-						{
-							BrowserUI.visible = false;
-							RecipeUI.wasInBrowser = true;
-						}
-						if (!RecipeUI.visible) RecipeUI.Toggle();
-						RecipeUI.DisplayRecipe(Main.HoverItem);
-					}
-				}
-				else BrowserUI.usageLock = false;
-				if (Main.keyState.IsKeyDown(Keys.F))
-				{
-					if (!BrowserUI.findLock) BrowserUI.QueryContainers();
-				}
-				else BrowserUI.findLock = false;
-			}
-
-			//if (Main.keyState.IsKeyDown(Keys.E))
-			//{
-			//	if (!browserLock)
-			//	{
-			//		if (RecipeUI.visible && RecipeUI.wasInBrowser)
-			//		{
-			//			RecipeUI.visible = false;
-			//			BrowserUI.visible = true;
-			//			RecipeUI.wasInBrowser = false;
-			//			browserLock = true;
-			//			return;
-			//		}
-
-			//		BrowserUI.Toggle();
-			//		browserLock = true;
-			//	}
-			//}
-			//else browserLock = false;
-
-			if (RecipeUI != null)
-			{
-				if (Main.keyState.IsKeyDown(Keys.Back))
-				{
-					if (!RecipeUI.backLock) RecipeUI.GoBack();
-				}
-				else RecipeUI.backLock = false;
-			}
-
-			if (BrowserUI != null && BrowserUI.visible && Main.keyState.IsKeyDown(Keys.RightControl) && Main.keyState.IsKeyDown(Keys.F)) BrowserUI.inputItems.Focus();
 		}
 
 		public override void AddRecipes()
