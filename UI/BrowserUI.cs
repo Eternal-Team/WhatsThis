@@ -1,11 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
+using TheOneLibrary.Base;
 using TheOneLibrary.Base.UI;
 using TheOneLibrary.UI.Elements;
 using TheOneLibrary.Utility;
@@ -23,8 +26,6 @@ namespace WhatsThis.UI
 		public UIBrowserGrid gridItems = new UIBrowserGrid();
 		public UIScrollbar barItems = new UIScrollbar();
 
-		public UITextButton buttonMode = new UITextButton("C");
-
 		public UITextButton buttonMods = new UITextButton("Mods");
 		public UITextButton buttonCategories = new UITextButton("Category");
 
@@ -36,17 +37,17 @@ namespace WhatsThis.UI
 		public UIGrid gridCategories = new UIGrid();
 		public UIScrollbar barCategories = new UIScrollbar();
 
-		//public Regex regex;
-		//public bool caseSensitive;
-		//public bool searchName = true;
+		public UITextButton buttonMode = new UITextButton("Cheat");
 
+		public Regex regex;
 		public bool cheatMode = true;
 
-		//public SortMode sortMode = SortMode.TypeAsc;
-		//public List<Mod> currentMods = new List<Mod>();
+		public SortMode sortMode = SortMode.TypeAsc;
 
-		//public string[] allCategories = { "Weapons", "Tools", "Armors", "Accessories", "Placeables", "Ammo", "Consumables", "Expert", "Fishing", "Mounts" };
-		//public List<string> currentCategories = new List<string>();
+		[Null] public static Dictionary<string, Func<Item, bool>> categories = new Dictionary<string, Func<Item, bool>>();
+
+		public List<string> currentMods = new List<string>();
+		public List<string> currentCategories = new List<string>();
 
 		public override void OnInitialize()
 		{
@@ -54,9 +55,10 @@ namespace WhatsThis.UI
 			panelMain.MinWidth.Set(284, 0); // Min 3 columns
 			panelMain.MaxWidth.Set(900, 0); // Max 17 columns 
 			panelMain.Height.Pixels = 648;
-			panelMain.MinHeight.Set(208, 0); // Min 3 rows
+			panelMain.MinHeight.Set(212, 0); // Min 3 rows
 			panelMain.MaxHeight.Set(904, 0); // Max 19 rows
-			panelMain.Center();
+			panelMain.Left.Set(100, 0);
+			panelMain.Top.Set(100, 0);
 			panelMain.SetPadding(0);
 			panelMain.BackgroundColor = panelColor;
 			panelMain.OnMouseDown += DragStart;
@@ -81,27 +83,16 @@ namespace WhatsThis.UI
 			buttonSortMode.Left.Pixels = -56;
 			buttonSortMode.Top.Pixels = 8;
 			buttonSortMode.HoverText = "Type ascending";
-			buttonSortMode.OnClick += (evt, element) => SortIcons();
-			buttonSortMode.OnRightClick += (evt, element) => SortIcons(true);
+			buttonSortMode.OnClick += SortIcons;
+			buttonSortMode.OnRightClick += SortIcons;
 			panelMain.Append(buttonSortMode);
 
-			buttonMode.Width.Pixels = 40;
-			buttonMode.Height.Pixels = 40;
-			buttonMode.HAlign = 1;
-			buttonMode.Left.Pixels = -8;
-			buttonMode.Top.Pixels = 8;
-			buttonMode.OnClick += (a, b) =>
-			{
-				//doesn't work
-				cheatMode = !cheatMode;
-				buttonMode.uiText.SetText(cheatMode ? "C" : "R");
-			};
-			panelMain.Append(buttonMode);
+			// Options
 			#endregion
 
 			#region Items
 			panelItems.Width.Set(-112, 1); // + 44
-			panelItems.Height.Set(-64, 1); // 16
+			panelItems.Height.Set(-64, 1); // + 16
 			panelItems.Left.Pixels = 8;
 			panelItems.Top.Pixels = 56;
 			panelItems.SetPadding(0);
@@ -126,203 +117,214 @@ namespace WhatsThis.UI
 			panelItems.Append(barItems);
 			#endregion
 
-			//buttonMods.Width.Pixels = 88;
-			//buttonMods.Height.Pixels = 40;
-			//buttonMods.Left.Pixels = 8;
-			//buttonMods.Top.Pixels = 56;
-			//buttonMods.OnClick += OpenMods;
-			//panelMain.Append(buttonMods);
+			#region Right Panel
+			buttonCategories.Width.Pixels = 88;
+			buttonCategories.Height.Pixels = 40;
+			buttonCategories.HAlign = 1;
+			buttonCategories.Left.Pixels = -8;
+			buttonCategories.Top.Pixels = 56;
+			buttonCategories.OnClick += OpenCategories;
+			panelMain.Append(buttonCategories);
 
-			//buttonCategories.Width.Pixels = 88;
-			//buttonCategories.Height.Pixels = 40;
-			//buttonCategories.Left.Pixels = 8;
-			//buttonCategories.Top.Pixels = 104;
-			//buttonCategories.OnClick += OpenCategories;
-			//panelMain.Append(buttonCategories);
+			buttonMods.Width.Pixels = 88;
+			buttonMods.Height.Pixels = 40;
+			buttonMods.HAlign = 1;
+			buttonMods.Left.Pixels = -8;
+			buttonMods.Top.Pixels = 104;
+			buttonMods.OnClick += OpenMods;
+			panelMain.Append(buttonMods);
 
-			//panelMods.Width.Pixels = ModLoader.GetLoadedMods().Select(x => Main.fontMouseText.MeasureString(ModLoader.GetMod(x).DisplayName).X).OrderByDescending(x => x).First() + 28;
-			//panelMods.Height.Set(-56, 0.5f);
-			//panelMods.Left.Pixels = panelMain.GetDimensions().X - panelMods.Width.Pixels + 2;
-			//panelMods.Top.Pixels = panelMain.GetDimensions().Y + 56;
-			//panelMods.SetPadding(0);
+			buttonMode.Width.Pixels = 88;
+			buttonMode.Height.Pixels = 40;
+			buttonMode.HAlign = 1;
+			buttonMode.Left.Pixels = -8;
+			buttonMode.VAlign = 1;
+			buttonMode.Top.Pixels = -8;
+			buttonMode.OnClick += (a, b) =>
+			{
+				cheatMode = !cheatMode;
+				buttonMode.uiText.SetText(cheatMode ? "Cheat" : "Recipe");
+			};
+			panelMain.Append(buttonMode);
+			#endregion
 
-			//gridMods.Width.Set(-16, 1);
-			//gridMods.Height.Set(-16, 1);
-			//gridMods.Left.Pixels = 8;
-			//gridMods.Top.Pixels = 8;
-			//gridMods.ListPadding = 4;
-			//gridMods.OverflowHidden = true;
-			//panelMods.Append(gridMods);
+			#region Side Panels
+			panelCategories.Width.Pixels = categories.Select(x => Main.fontMouseText.MeasureString(x.Key).X).OrderByDescending(x => x).First() + 28;
+			panelCategories.Left.Pixels = panelMain.GetDimensions().Width;
+			panelCategories.Top.Pixels = 56;
+			panelCategories.SetPadding(0);
 
-			//barMods.SetView(100f, 1000f);
-			//gridMods.SetScrollbar(barMods);
+			gridCategories.Width.Set(-16, 1);
+			gridCategories.Height.Set(-16, 1);
+			gridCategories.Left.Pixels = 8;
+			gridCategories.Top.Pixels = 8;
+			gridCategories.ListPadding = 4;
+			gridCategories.OverflowHidden = true;
+			panelCategories.Append(gridCategories);
 
-			//InitMods();
+			barCategories.SetView(100f, 1000f);
+			gridCategories.SetScrollbar(barCategories);
 
-			//panelCategories.Width.Pixels = allCategories.Select(x => Main.fontMouseText.MeasureString(x).X).OrderByDescending(x => x).First() + 28;
-			//panelCategories.Height.Set(-56, 0.5f);
-			//panelCategories.Left.Pixels = panelMain.GetDimensions().X - panelCategories.Width.Pixels + 2;
-			//panelCategories.Top.Pixels = panelMain.GetDimensions().Y + 56;
-			//panelCategories.SetPadding(0);
+			panelMods.Width.Pixels = 300;
+			panelMods.Left.Pixels = panelMain.GetDimensions().Width;
+			panelMods.Top.Pixels = 104;
+			panelMods.SetPadding(0);
 
-			//gridCategories.Width.Set(-16, 1);
-			//gridCategories.Height.Set(-16, 1);
-			//gridCategories.Left.Pixels = 8;
-			//gridCategories.Top.Pixels = 8;
-			//gridCategories.ListPadding = 4;
-			//gridCategories.OverflowHidden = true;
-			//panelCategories.Append(gridCategories);
+			gridMods.Width.Set(-16, 1);
+			gridMods.Height.Set(-16, 1);
+			gridMods.Left.Pixels = 8;
+			gridMods.Top.Pixels = 8;
+			gridMods.ListPadding = 4;
+			gridMods.OverflowHidden = true;
+			panelMods.Append(gridMods);
 
-			//barCategories.SetView(100f, 1000f);
-			//gridCategories.SetScrollbar(barCategories);
-
-			//InitCategories();
+			barMods.SetView(100f, 1000f);
+			gridMods.SetScrollbar(barMods); 
+			#endregion
 		}
 
 		public void InitMods()
 		{
-			//foreach (string modName in ModLoader.GetLoadedMods())
-			//{
-			//	UIModItem mod = new UIModItem(ModLoader.GetMod(modName));
-			//	mod.Width.Precent = 1;
-			//	mod.Height.Pixels = 40;
-			//	mod.OnClick += (e, element) =>
-			//	{
-			//		if (currentMods.Contains(mod.mod))
-			//		{
-			//			mod.SetInactive();
-			//			currentMods.Remove(mod.mod);
+			gridMods.Clear();
+			foreach (Mod mod in ModLoader.GetLoadedMods().Select(ModLoader.GetMod).Where(x => !x.Name.StartsWith("ModLoader") && typeof(Mod).GetField<Dictionary<string, ModItem>>("items", x).Count > 0))
+			{
+				UIModItem modItem = new UIModItem(mod);
+				modItem.Width.Precent = 1;
+				modItem.Height.Pixels = 40;
+				modItem.OnClick += (e, element) =>
+				{
+					if (currentMods.Contains(modItem.mod.Name))
+					{
+						modItem.SetInactive();
+						currentMods.Remove(modItem.mod.Name);
 
-			//			ScanItems();
+						UpdateItems();
 
-			//			if (currentMods.Count == 0) foreach (UIElement item in gridMods.items) (item as UIModItem)?.SetActive();
-			//		}
-			//		else
-			//		{
-			//			if (currentMods.Count == 0)
-			//			{
-			//				currentMods.Clear();
-			//				foreach (UIElement item in gridMods.items) (item as UIModItem)?.SetInactive();
-			//			}
+						if (!currentMods.Any()) gridMods.items.ForEach(x => ((UIModItem)x).SetActive());
+					}
+					else
+					{
+						if (!currentMods.Any())
+						{
+							currentMods.Clear();
+							gridMods.items.ForEach(x => ((UIModItem)x).SetInactive());
+						}
 
-			//			mod.SetActive();
-			//			currentMods.Add(mod.mod);
+						modItem.SetActive();
+						currentMods.Add(modItem.mod.Name);
 
-			//			ScanItems();
-			//		}
-			//	};
-
-			//	if (currentMods.Contains(mod.mod) || currentMods.Count == 0) mod.SetActive();
-			//	else mod.SetInactive();
-			//	gridMods.Add(mod);
-			//	mod.OnInitialize();
-			//}
+						UpdateItems();
+					}
+				};
+				gridMods.Add(modItem);
+			}
 		}
 
 		public void InitCategories()
 		{
-			//    foreach (string categoryName in allCategories)
-			//    {
-			//        UICategoryItem category = new UICategoryItem(categoryName);
-			//        category.Width.Precent = 1;
-			//        category.Height.Pixels = 40;
-			//        category.OnClick += (e, element) =>
-			//        {
-			//            if (currentCategories.Contains(category.category))
-			//            {
-			//                category.SetInactive();
-			//                currentCategories.Remove(category.category);
+			categories.Add("Weapons", item => (item.melee || item.ranged || item.magic || item.summon || item.thrown) && item.damage > 0);
+			categories.Add("Armors", item => item.defense > 0 && !item.accessory);
+			categories.Add("Tools", item => item.pick > 0 || item.axe > 0 || item.hammer > 0 || item.fishingPole > 0);
+			categories.Add("Accessories", item => item.accessory);
+			categories.Add("Placeables", item => item.createTile > 0 || item.createWall > 0);
+			categories.Add("Ammo", item => item.ammo > 0 && item.shoot > 0);
+			categories.Add("Consumables", item => item.consumable || item.potion);
+			categories.Add("Expert", item => item.expert || item.expertOnly);
+			categories.Add("Fishing", item => item.fishingPole > 0 || item.bait > 0);
+			categories.Add("Mounts", item => item.mountType > 0);
+		}
 
-			//                ScanItems();
+		public void PopulateCategories()
+		{
+			gridCategories.Clear();
+			foreach (KeyValuePair<string, Func<Item, bool>> categoryName in categories)
+			{
+				UICategoryItem category = new UICategoryItem(categoryName.Key);
+				category.Width.Precent = 1;
+				category.Height.Pixels = 40;
+				category.OnClick += (e, element) =>
+				{
+					if (currentCategories.Contains(category.category))
+					{
+						category.SetInactive();
+						currentCategories.Remove(category.category);
 
-			//                if (currentCategories.Count == 0) foreach (UIElement item in gridCategories.items) (item as UICategoryItem)?.SetActive();
-			//            }
-			//            else
-			//            {
-			//                if (currentCategories.Count == 0)
-			//                {
-			//                    currentCategories.Clear();
-			//                    foreach (UIElement item in gridCategories.items) (item as UICategoryItem)?.SetInactive();
-			//                }
+						UpdateItems();
 
-			//                category.SetActive();
-			//                currentCategories.Add(category.category);
-			//                ScanItems();
-			//            }
-			//        };
+						if (currentCategories.Count == 0) gridCategories.items.ForEach(x => ((UICategoryItem)x).SetActive());
+					}
+					else
+					{
+						if (currentCategories.Count == 0)
+						{
+							currentCategories.Clear();
+							gridCategories.items.ForEach(x => ((UICategoryItem)x).SetInactive());
+						}
 
-			//        if (currentCategories.Contains(category.category) || currentCategories.Count == 0) category.SetActive();
-			//        else category.SetInactive();
-			//        gridCategories.Add(category);
-			//        category.OnInitialize();
-			//    }
+						category.SetActive();
+						currentCategories.Add(category.category);
+						UpdateItems();
+					}
+				};
+
+				gridCategories.Add(category);
+			}
 		}
 
 		private void OpenMods(UIMouseEvent evt, UIElement listeningElement)
 		{
-			//if (HasChild(panelCategories)) RemoveChild(panelCategories);
+			if (HasChild(panelCategories)) RemoveChild(panelCategories);
 
-			//if (HasChild(panelMods)) RemoveChild(panelMods);
-			//else Append(panelMods);
+			if (HasChild(panelMods)) RemoveChild(panelMods);
+			else
+			{
+				Append(panelMods);
+				RecalculatePanels();
+			}
 		}
 
 		private void OpenCategories(UIMouseEvent evt, UIElement listeningElement)
 		{
-			//if (HasChild(panelMods)) RemoveChild(panelMods);
+			if (HasChild(panelMods)) RemoveChild(panelMods);
 
-			//if (HasChild(panelCategories)) RemoveChild(panelCategories);
-			//else Append(panelCategories);
+			if (HasChild(panelCategories)) RemoveChild(panelCategories);
+			else
+			{
+				Append(panelCategories);
+				RecalculatePanels();
+			}
 		}
 
-		private void SortIcons(bool rightClick = false)
+		private void SortIcons(UIMouseEvent evt, UIElement element)
 		{
-			//sortMode = rightClick ? sortMode.PreviousEnum() : sortMode.NextEnum();
-			//buttonSortMode.HoverText = Utility.ToString(sortMode);
+			sortMode = (SortMode)buttonSortMode.index;
+			buttonSortMode.HoverText = Utility.ToString(sortMode);
 
-			//gridItems.UpdateOrder();
-			//gridItems.RecalculateChildren();
+			gridItems.UpdateOrder();
+			gridItems.RecalculateChildren();
 		}
 
-		public void ScanItems()
+		public void UpdateItems()
 		{
-			//for (int i = 0; i < gridItems.Count; i++) gridItems.items[i].visible = gridItems.items[i].PassFilters();
-			//gridItems.Recalculate();
-			//gridItems.RecalculateChildren();
+			for (int i = 0; i < gridItems.Count; i++) gridItems.items[i].visible = gridItems.items[i].PassFilters();
+			gridItems.Recalculate();
+			gridItems.RecalculateChildren();
 		}
 
 		public void QueryItems()
 		{
-			//string pattern = caseSensitive ? inputItems.GetText() : inputItems.GetText().ToLower();
+			string pattern = inputItems.GetText().ToLower();
+			try
+			{
+				regex = new Regex(pattern.TrimStart('#'));
+				panelInputItems.BorderColor = Color.Black;
 
-			//if (pattern.StartsWith("#"))
-			//{
-			//	pattern = pattern.TrimStart('#');
-			//	searchName = false;
-			//}
-			//else searchName = true;
-
-			//try
-			//{
-			//	regex = new Regex(pattern);
-			//}
-			//catch (ArgumentException)
-			//{
-			//	regex = null;
-			//}
-
-			//if (regex != null)
-			//{
-			//	//buttonRegexValid.opacityActive = 0.5f;
-			//	//buttonRegexValid.HoverText = "Regex is valid";
-			//	panelInputItems.BorderColor = Color.Black;
-			//	for (int i = 0; i < gridItems.Count; i++) gridItems.items[i].visible = gridItems.items[i].PassFilters();
-			//	gridItems.Recalculate();
-			//	gridItems.RecalculateChildren();
-			//}
-			//else
-			//{
-			//	panelInputItems.BorderColor = Color.Red;
-			//}
+				UpdateItems();
+			}
+			catch (ArgumentException)
+			{
+				panelInputItems.BorderColor = Color.Red;
+			}
 		}
 
 		public void DisplayRecipe()
@@ -364,6 +366,24 @@ namespace WhatsThis.UI
 			//}
 		}
 
+		public void RecalculatePanels()
+		{
+			CalculatedStyle dimensions = panelMain.GetDimensions();
+			panelMods.Height.Set(dimensions.Height - 104, 0);
+			panelMods.Left.Set(dimensions.X + dimensions.Width, 0f);
+			panelMods.Top.Set(dimensions.Y + 104, 0f);
+
+			panelMods.Recalculate();
+			gridMods.Recalculate();
+
+			panelCategories.Height.Set(dimensions.Height - 56, 0);
+			panelCategories.Left.Set(dimensions.X + dimensions.Width, 0f);
+			panelCategories.Top.Set(dimensions.Y + 56, 0f);
+
+			panelCategories.Recalculate();
+			gridCategories.Recalculate();
+		}
+
 		#region Dragging & Resizing
 		public bool resizing;
 		public override void DragStart(UIMouseEvent evt, UIElement listeningElement)
@@ -393,6 +413,7 @@ namespace WhatsThis.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			CalculatedStyle dimensions = panelMain.GetOuterDimensions();
+
 			if (panelMain.ContainsPoint(Main.MouseScreen))
 			{
 				Main.LocalPlayer.mouseInterface = true;
@@ -404,22 +425,21 @@ namespace WhatsThis.UI
 			{
 				panelMain.Left.Set(Main.MouseScreen.X - offset.X, 0f);
 				panelMain.Top.Set(Main.MouseScreen.Y - offset.Y, 0f);
-
 				panelMain.Recalculate();
+
+				RecalculatePanels();
 			}
 			if (resizing)
 			{
 				panelMain.Width.Set((Main.MouseScreen.X - dimensions.X - offset.X - 156).ToNearest(44) + 156, 0);
 				panelMain.Height.Set((Main.MouseScreen.Y - dimensions.Y - offset.Y - 80).ToNearest(44) + 80, 0);
-
-				CalculatedStyle dimensionsGrid = gridItems.GetDimensions();
-				gridItems.columns = (int)System.Math.Round(dimensionsGrid.Width / 44);
-
-				//barItems.Top.Precent = 8 / dimensionsGrid.Height;
-				//barItems.Height.Precent = (dimensionsGrid.Height - 32) / dimensionsGrid.Height;
-
 				panelMain.Recalculate();
 				panelMain.RecalculateChildren();
+
+				CalculatedStyle dimensionsGrid = gridItems.GetDimensions();
+				gridItems.columns = (int)Math.Round(dimensionsGrid.Width / 44);
+
+				RecalculatePanels();
 			}
 
 			base.DrawSelf(spriteBatch);

@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using TheOneLibrary.UI.Elements;
+using TheOneLibrary.Utility;
 
 namespace WhatsThis.UI
 {
@@ -169,8 +170,27 @@ namespace WhatsThis.UI
 			List<SnapPoint> list = new List<SnapPoint>();
 			SnapPoint item;
 			if (GetSnapPoint(out item)) list.Add(item);
-			foreach (UIElement current in items) list.AddRange(current.GetSnapPoints());
+			foreach (BaseElement current in items) list.AddRange(current.GetSnapPoints());
 			return list;
+		}
+
+		public override void Draw(SpriteBatch spriteBatch)
+		{
+			spriteBatch.End();
+
+			RasterizerState state = new RasterizerState { ScissorTestEnable = true };
+
+			Rectangle prevRect = spriteBatch.GraphicsDevice.ScissorRectangle;
+			spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(GetClippingRectangle(spriteBatch), spriteBatch.GraphicsDevice.ScissorRectangle);
+			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
+
+			DrawSelf(spriteBatch);
+			RecalculateChildren();
+			typeof(UIInnerList).InvokeMethod<object>("DrawChildren", new object[] { spriteBatch }, innerList);
+
+			spriteBatch.End();
+			spriteBatch.GraphicsDevice.ScissorRectangle = prevRect;
+			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, null, null, Main.UIScaleMatrix);
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)

@@ -53,9 +53,6 @@ namespace WhatsThis
 					return;
 				}
 				
-				BrowserUI.Initialize();
-				BrowserUI.OnActivate();
-
 				BrowserUI.Toggle();
 			}
 

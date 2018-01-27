@@ -1,15 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.ObjectData;
 using Terraria.UI;
 using TheOneLibrary.Base;
 using TheOneLibrary.Recipe;
@@ -67,8 +63,12 @@ namespace WhatsThis
 				textureSortMode = new List<Texture2D>();
 				for (int i = 0; i < 4; i++) textureSortMode.Add(ModLoader.GetTexture(TexturePath + "SortMode_" + i));
 
+
 				IBrowserUI = new UserInterface();
 				BrowserUI = new BrowserUI();
+
+				BrowserUI.InitCategories();
+
 				BrowserUI.Activate();
 				IBrowserUI.SetState(BrowserUI);
 
@@ -81,17 +81,18 @@ namespace WhatsThis
 
 		public override void PostSetupContent()
 		{
-			for (int i = 0; i < ItemLoader.ItemCount; i++)
+			for (int i = 1; i < ItemLoader.ItemCount; i++)
 			{
 				Item item = new Item();
-				item.SetDefaults(i);
+				item.SetDefaults(i, false);
+				if (item.type == 0) continue;
 
-				if (!item.IsAir)
-				{
-					UIBrowserIcon slot = new UIBrowserIcon(i, item);
-					BrowserUI.gridItems.Add(slot);
-				}
+				UIBrowserIcon slot = new UIBrowserIcon(i, item);
+				BrowserUI.gridItems.Add(slot);
 			}
+
+			BrowserUI.PopulateCategories();
+			BrowserUI.InitMods();
 		}
 
 		public override void Unload()
@@ -101,10 +102,15 @@ namespace WhatsThis
 			GC.Collect();
 		}
 
+		public override void PreSaveAndQuit()
+		{
+			BrowserUI.visible = false;
+			RecipeUI.visible = false;
+		}
+
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
 			int InventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
-			int SmartIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Smart Cursor Targets"));
 
 			if (InventoryIndex != -1)
 			{
@@ -123,7 +129,7 @@ namespace WhatsThis
 
 				if (RecipeUI.visible)
 				{
-					layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
+					layers.Insert(InventoryIndex+1, new LegacyGameInterfaceLayer(
 						"WhatsThis: Recipe",
 						delegate
 						{
@@ -135,8 +141,8 @@ namespace WhatsThis
 				}
 			}
 
-			if (SmartIndex != -1)
-			{
+			//if (SmartIndex != -1)
+			//{
 				// Postdraw tiles
 				//layers.Insert(InventoryIndex, new LegacyGameInterfaceLayer(
 				//    "WhatsThis: ContainerOverlay",
@@ -158,7 +164,7 @@ namespace WhatsThis
 
 				//        return true;
 				//    }));
-			}
+			//}
 		}
 
 		public override void AddRecipes()

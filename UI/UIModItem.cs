@@ -1,8 +1,8 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.IO;
 using Terraria;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.UI;
 using TheOneLibrary.Base.UI;
@@ -14,50 +14,43 @@ namespace WhatsThis.UI
 	public class UIModItem : BaseElement
 	{
 		public Mod mod;
+		public Texture2D iconTexture;
 
-		private UIPanel panel = new UIPanel();
-		private UIText uiText = new UIText("Mod");
+		public Color textColor = Color.White;
+		public Color bgColor = BaseUI.panelColor;
 
 		public UIModItem(Mod mod)
 		{
 			this.mod = mod;
 
-			panel.Width.Precent = 1;
-			panel.Height.Precent = 1;
-			panel.BackgroundColor = BaseUI.panelColor;
-			panel.SetPadding(0);
-			Append(panel);
-
-			uiText.SetText(mod.DisplayName);
-			uiText.Center();
-			panel.Append(uiText);
-		}
-
-		public override void OnInitialize()
-		{
-			CalculatedStyle dimensions = panel.GetDimensions();
-			if (dimensions.Width > 0 && dimensions.Height > 0)
-			{
-				float textScale = Math.Min((dimensions.Width - 12) / Main.fontMouseText.MeasureString(mod.DisplayName).X, (dimensions.Height - 12) / Main.fontMouseText.MeasureString(mod.DisplayName).Y);
-				uiText.SetText(mod.DisplayName, textScale, false);
-			}
+			if (mod.File.HasFile("icon.png")) iconTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, new MemoryStream(mod.File.GetFile("icon.png")));
 		}
 
 		public void SetInactive()
 		{
-			panel.BackgroundColor = Color.LightGray * 0.7f;
-			uiText.TextColor = Color.LightGray;
+			bgColor = Color.LightGray * 0.7f;
+			textColor = Color.LightGray;
 		}
 
 		public void SetActive()
 		{
-			panel.BackgroundColor = BaseUI.panelColor;
-			uiText.TextColor = Color.White;
+			bgColor = BaseUI.panelColor;
+			textColor = Color.White;
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
-			if (visible) base.DrawSelf(spriteBatch);
+			CalculatedStyle dimensions = GetDimensions();
+
+			spriteBatch.DrawPanel(dimensions, TheOneLibrary.TheOneLibrary.backgroundTexture, bgColor);
+			spriteBatch.DrawPanel(dimensions, TheOneLibrary.TheOneLibrary.borderTexture, Color.Black);
+
+			if (iconTexture != null)
+			{
+				spriteBatch.Draw(iconTexture, new Rectangle((int)(dimensions.X + 8), (int)(dimensions.Y + 4), (int)(dimensions.Height - 8), (int)(dimensions.Height - 8)), Color.White);
+				Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, mod.DisplayName, dimensions.X + dimensions.Height + 4, dimensions.Y + dimensions.Height / 2f - 10, textColor, Color.Black, Vector2.Zero);
+			}
+			else Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, mod.DisplayName, dimensions.X + 8, dimensions.Y + dimensions.Height / 2f - 10, textColor, Color.Black, Vector2.Zero);
 		}
 	}
 }
