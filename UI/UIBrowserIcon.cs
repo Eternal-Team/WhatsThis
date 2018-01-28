@@ -25,36 +25,57 @@ namespace WhatsThis.UI
             this.item = item;
         }
 
-        // copy from UIContainerSlot
-        //public override void Click(UIMouseEvent evt)
-        //{
-        //    base.Click(evt);
+        public override void Click(UIMouseEvent evt)
+        {
+            if (WhatsThis.Instance.BrowserUI.cheatMode)
+            {
+                if (Main.mouseItem.IsAir)
+                {
+                    Main.mouseItem.SetDefaults(item.type);
+                    Main.mouseItem.stack = Main.mouseItem.maxStack;
+                }
+                else if (Main.mouseItem.type == item.type) Main.mouseItem.stack = Main.mouseItem.maxStack;
 
-        //    if (WhatsThis.Instance.BrowserUI.cheatMode)
-        //    {
-        //        if (Main.mouseItem.IsAir)
-        //        {
-        //            Main.mouseItem.SetDefaults(item.type);
-        //            Main.mouseItem.stack = Main.mouseItem.maxStack;
-        //        }
-        //        else if (Main.mouseItem.type == item.type) Main.mouseItem.stack = Main.mouseItem.maxStack;
+                Recipe.FindRecipes();
+                Main.PlaySound(7);
+            }
+        }
 
-        //        Main.PlaySound(SoundID.Coins);
-        //    }
-        //}
+        public void RightMouseDownCont()
+        {
+            if (Main.LocalPlayer.itemAnimation > 0) return;
 
-        //public override void RightClick(UIMouseEvent evt)
-        //{
-        //    base.RightClick(evt);
+            if (WhatsThis.Instance.BrowserUI.cheatMode)
+            {
+                if (Main.stackSplit <= 1 && Main.mouseRight)
+                {
+                    if (item.maxStack > 1 && (Main.mouseItem.IsTheSameAs(item) || Main.mouseItem.type == 0) && (Main.mouseItem.stack < Main.mouseItem.maxStack || Main.mouseItem.type == 0))
+                    {
+                        if (Main.mouseItem.type == 0)
+                        {
+                            Main.mouseItem = item.Clone();
+                            Main.mouseItem.stack = 0;
+                            if (item.favorited && item.maxStack == 1) Main.mouseItem.favorited = true;
+                            Main.mouseItem.favorited = false;
+                        }
+                        Main.mouseItem.stack++;
 
-        //    if (WhatsThis.Instance.BrowserUI.cheatMode)
-        //    {
-        //        if (Main.mouseItem.IsAir) Main.mouseItem.SetDefaults(item.type);
-        //        else if (Main.mouseItem.type == item.type) Main.mouseItem.stack += Math.Min(1, Main.mouseItem.maxStack - Main.mouseItem.stack);
+                        Recipe.FindRecipes();
 
-        //        Main.PlaySound(SoundID.Coins);
-        //    }
-        //}
+                        Main.soundInstanceMenuTick.Stop();
+                        Main.soundInstanceMenuTick = Main.soundMenuTick.CreateInstance();
+                        Main.PlaySound(12);
+
+                        Main.stackSplit = Main.stackSplit == 0 ? 15 : Main.stackDelay;
+                    }
+                }
+            }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            if (Main.mouseRight && Main.hasFocus && IsMouseHovering) RightMouseDownCont();
+        }
 
         public override int CompareTo(object obj) => BrowserUI.sortModes[WhatsThis.Instance.BrowserUI.sortMode].Invoke(item, (obj as UIBrowserIcon)?.item);
 
