@@ -16,61 +16,47 @@ namespace WhatsThis.UI
         public Texture2D backgroundTexture = Main.inventoryBackTexture;
 
         public Item item;
-        public int index;
 
-        public UIBrowserIcon(int index, Item item)
+        public UIBrowserIcon(Item item)
         {
             Width.Pixels = 40;
             Height.Pixels = 40;
 
-            this.index = index;
             this.item = item;
         }
 
-        public override void Click(UIMouseEvent evt)
-        {
-            base.Click(evt);
+        // copy from UIContainerSlot
+        //public override void Click(UIMouseEvent evt)
+        //{
+        //    base.Click(evt);
 
-            if (WhatsThis.Instance.BrowserUI.cheatMode)
-            {
-                if (Main.mouseItem.IsAir)
-                {
-                    Main.mouseItem.SetDefaults(item.type);
-                    Main.mouseItem.stack = Main.mouseItem.maxStack;
-                }
-                else if (Main.mouseItem.type == item.type) Main.mouseItem.stack = Main.mouseItem.maxStack;
+        //    if (WhatsThis.Instance.BrowserUI.cheatMode)
+        //    {
+        //        if (Main.mouseItem.IsAir)
+        //        {
+        //            Main.mouseItem.SetDefaults(item.type);
+        //            Main.mouseItem.stack = Main.mouseItem.maxStack;
+        //        }
+        //        else if (Main.mouseItem.type == item.type) Main.mouseItem.stack = Main.mouseItem.maxStack;
 
-                Main.PlaySound(SoundID.Coins);
-            }
-        }
+        //        Main.PlaySound(SoundID.Coins);
+        //    }
+        //}
 
-        public override void RightClick(UIMouseEvent evt)
-        {
-            base.RightClick(evt);
+        //public override void RightClick(UIMouseEvent evt)
+        //{
+        //    base.RightClick(evt);
 
-            if (WhatsThis.Instance.BrowserUI.cheatMode)
-            {
-                if (Main.mouseItem.IsAir) Main.mouseItem.SetDefaults(item.type);
-                else if (Main.mouseItem.type == item.type) Main.mouseItem.stack += Math.Min(1, Main.mouseItem.maxStack - Main.mouseItem.stack);
+        //    if (WhatsThis.Instance.BrowserUI.cheatMode)
+        //    {
+        //        if (Main.mouseItem.IsAir) Main.mouseItem.SetDefaults(item.type);
+        //        else if (Main.mouseItem.type == item.type) Main.mouseItem.stack += Math.Min(1, Main.mouseItem.maxStack - Main.mouseItem.stack);
 
-                Main.PlaySound(SoundID.Coins);
-            }
-        }
+        //        Main.PlaySound(SoundID.Coins);
+        //    }
+        //}
 
-        public override int CompareTo(object obj)
-        {
-            UIBrowserIcon other = obj as UIBrowserIcon;
-
-            switch (WhatsThis.Instance.BrowserUI.sortMode)
-            {
-                case SortMode.AZ: return string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
-                case SortMode.ZA: return -string.Compare(item.HoverName, other?.item.HoverName, StringComparison.Ordinal);
-                case SortMode.TypeAsc: return index.CompareTo(other?.index);
-                case SortMode.TypeDesc: return -index.CompareTo(other?.index);
-                default:
-                    return index.CompareTo(other?.index);
-            }
-        }
+        public override int CompareTo(object obj) => BrowserUI.sortModes[WhatsThis.Instance.BrowserUI.sortMode].Invoke(item, (obj as UIBrowserIcon)?.item);
 
         public override bool PassFilters()
         {
@@ -78,7 +64,7 @@ namespace WhatsThis.UI
 
             if (WhatsThis.Instance.BrowserUI.currentMods.Count > 0) result &= item.modItem != null && WhatsThis.Instance.BrowserUI.currentMods.Contains(item.modItem.mod.Name);
 
-	        if (WhatsThis.Instance.BrowserUI.currentCategories.Count > 0) result &= WhatsThis.Instance.BrowserUI.currentCategories.Any(x => BrowserUI.categories[x].Invoke(item));
+            if (WhatsThis.Instance.BrowserUI.currentCategories.Count > 0) result &= WhatsThis.Instance.BrowserUI.currentCategories.Any(x => BrowserUI.categories[x].Invoke(item));
 
             if (WhatsThis.Instance.BrowserUI.inputItems.GetText().Length > 0)
             {

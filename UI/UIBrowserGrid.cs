@@ -181,8 +181,10 @@ namespace WhatsThis.UI
 			RasterizerState state = new RasterizerState { ScissorTestEnable = true };
 
 			Rectangle prevRect = spriteBatch.GraphicsDevice.ScissorRectangle;
-			spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(GetClippingRectangle(spriteBatch), spriteBatch.GraphicsDevice.ScissorRectangle);
-			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
+
+            spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(GetClippingRectangle(spriteBatch), spriteBatch.GraphicsDevice.ScissorRectangle);
+            
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
 
 			DrawSelf(spriteBatch);
 			RecalculateChildren();

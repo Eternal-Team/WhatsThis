@@ -68,6 +68,7 @@ namespace WhatsThis
 				BrowserUI = new BrowserUI();
 
 				BrowserUI.InitCategories();
+                BrowserUI.InitSortModes();
 
 				BrowserUI.Activate();
 				IBrowserUI.SetState(BrowserUI);
@@ -92,7 +93,7 @@ namespace WhatsThis
 			}
 
 			BrowserUI.PopulateCategories();
-			BrowserUI.InitMods();
+			BrowserUI.PopulateMods();
 		}
 
 		public override void Unload()
