@@ -2,10 +2,8 @@
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
@@ -34,7 +32,9 @@ namespace WhatsThis
         [Null] public static ModHotKey FindItem;
         [Null] public static ModHotKey PrevRecipe;
 
-        [Null] public static List<Texture2D> textureSortMode;
+        public static List<Texture2D> textureSortMode = new List<Texture2D>();
+        public static Texture2D texturePause;
+        public static Texture2D texturePlay;
 
         internal int timer;
         internal List<Point16> foundContainers = new List<Point16>();
@@ -62,14 +62,17 @@ namespace WhatsThis
 
             if (!Main.dedServ)
             {
-                textureSortMode = new List<Texture2D>();
                 for (int i = 0; i < 4; i++) textureSortMode.Add(ModLoader.GetTexture(TexturePath + "SortMode_" + i));
+                texturePause = ModLoader.GetTexture(TexturePath + "Pause");
+                texturePlay = ModLoader.GetTexture(TexturePath + "Play");
 
                 IBrowserUI = new UserInterface();
                 BrowserUI = new BrowserUI();
 
                 BrowserUI.InitCategories();
                 BrowserUI.InitSortModes();
+                BrowserUI.InitCheatButtons();
+                BrowserUI.InitPanels();
 
                 BrowserUI.Activate();
                 IBrowserUI.SetState(BrowserUI);
@@ -101,6 +104,9 @@ namespace WhatsThis
         {
             BrowserUI.categories.Clear();
             BrowserUI.sortModes.Clear();
+
+            textureSortMode.Clear();
+
             this.UnloadNullableTypes();
 
             GC.Collect();
