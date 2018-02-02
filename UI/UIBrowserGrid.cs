@@ -99,8 +99,6 @@ namespace WhatsThis.UI
 		public override void Recalculate()
 		{
 			base.Recalculate();
-
-			innerList.Recalculate();
 			UpdateScrollbar();
 		}
 
@@ -112,12 +110,14 @@ namespace WhatsThis.UI
 
 		public override void RecalculateChildren()
 		{
-			base.RecalculateChildren();
 			float top = 0f;
 			float left = 0f;
 
+			base.RecalculateChildren();
+
 			innerList.RemoveAllChildren();
 
+			// this is a bit wonky
 			int index = 0;
 			for (int i = 0; i < items.Count; i++)
 			{

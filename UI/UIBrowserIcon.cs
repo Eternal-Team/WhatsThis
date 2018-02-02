@@ -41,7 +41,7 @@ namespace WhatsThis.UI
             }
         }
 
-        public void RightMouseDownCont()
+        public override void RightClickContinuous()
         {
             if (Main.LocalPlayer.itemAnimation > 0) return;
 
@@ -70,11 +70,6 @@ namespace WhatsThis.UI
                     }
                 }
             }
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            if (Main.mouseRight && Main.hasFocus && IsMouseHovering) RightMouseDownCont();
         }
 
         public override int CompareTo(object obj) => BrowserUI.sortModes[WhatsThis.Instance.BrowserUI.sortMode].Invoke(item, (obj as UIBrowserIcon)?.item);
