@@ -178,17 +178,17 @@ namespace WhatsThis.UI
 		{
 			spriteBatch.End();
 
-			RasterizerState state = new RasterizerState { ScissorTestEnable = true };
+			RasterizerState state = new RasterizerState {ScissorTestEnable = true};
 
 			Rectangle prevRect = spriteBatch.GraphicsDevice.ScissorRectangle;
 
-            spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(GetClippingRectangle(spriteBatch), spriteBatch.GraphicsDevice.ScissorRectangle);
-            
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
+			spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(GetClippingRectangle(spriteBatch), spriteBatch.GraphicsDevice.ScissorRectangle);
+
+			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
 
 			DrawSelf(spriteBatch);
 			RecalculateChildren();
-			typeof(UIInnerList).InvokeMethod<object>("DrawChildren", new object[] { spriteBatch }, innerList);
+			typeof(UIInnerList).InvokeMethod<object>("DrawChildren", new object[] {spriteBatch}, innerList);
 
 			spriteBatch.End();
 			spriteBatch.GraphicsDevice.ScissorRectangle = prevRect;

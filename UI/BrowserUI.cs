@@ -18,12 +18,12 @@ namespace WhatsThis.UI
 {
 	public partial class BrowserUI
 	{
-		public static int pausedTime;
+		public static double pausedTime;
 		public static bool pausedTimeBool;
 
-		public static int Time
+		public static double Time
 		{
-			get { return (int)(Main.dayTime ? Main.time : Main.time + 54000); }
+			get { return Main.dayTime ? Main.time : Main.time + 54000; }
 			set
 			{
 				pausedTime = value;
@@ -72,6 +72,8 @@ namespace WhatsThis.UI
 
 		public List<string> currentMods = new List<string>();
 		public List<string> currentCategories = new List<string>();
+
+		public bool resizing;
 	}
 
 	public partial class BrowserUI : BaseUI
@@ -109,7 +111,7 @@ namespace WhatsThis.UI
 			buttonSortMode.HAlign = 1;
 			buttonSortMode.Left.Pixels = -56;
 			buttonSortMode.Top.Pixels = 8;
-			buttonSortMode.HoverText = "Type ascending";
+			buttonSortMode.HoverText += () => sortMode;
 			buttonSortMode.OnClick += SortClick;
 			buttonSortMode.OnRightClick += SortClick;
 			panelMain.Append(buttonSortMode);
@@ -166,7 +168,7 @@ namespace WhatsThis.UI
 			buttonMode.OnClick += (a, b) =>
 			{
 				cheatMode = !cheatMode;
-				buttonMode.uiText.SetText(cheatMode ? "Cheat" : "Recipe");
+				buttonMode.text = cheatMode ? "Cheat" : "Recipe";
 			};
 			panelMain.Append(buttonMode);
 			#endregion
@@ -318,11 +320,115 @@ namespace WhatsThis.UI
 			panelTrash.Append(buttonTrashNPCs);
 			#endregion
 
+			#region Invasion
+			UIPanel panelInvasion = new UIPanel();
+			panelInvasion.Width.Set(0f, 1f);
+			panelInvasion.Height.Pixels = 132;
+			panelInvasion.Top.Pixels = 92;
+			panelInvasion.SetPadding(0);
+			panelEntity.Append(panelInvasion);
+
+			UIText textInvasion = new UIText("Invasion");
+			textInvasion.HAlign = 0.5f;
+			textInvasion.Top.Pixels = 8;
+			panelInvasion.Append(textInvasion);
+
+			UIButton buttonStopAll = new UIButton(WhatsThis.textureMagnet);
+			buttonStopAll.Width.Pixels = 40;
+			buttonStopAll.Height.Pixels = 40;
+			buttonStopAll.Left.Pixels = 8;
+			buttonStopAll.Top.Pixels = 36;
+			buttonStopAll.HoverText += () => "Stop all invasions";
+			buttonStopAll.OnClick += (a, b) => Utility.StopAllEvents();
+			panelInvasion.Append(buttonStopAll);
+
+			UIButton buttonBloodMoon = new UIButton(Main.itemTexture[ItemID.BloodWater]);
+			buttonBloodMoon.Width.Pixels = 40;
+			buttonBloodMoon.Height.Pixels = 40;
+			buttonBloodMoon.Left.Pixels = 56;
+			buttonBloodMoon.Top.Pixels = 36;
+			buttonBloodMoon.HoverText += () => "Start Blood Moon";
+			buttonBloodMoon.OnClick += (a, b) => Utility.StartEvent(Events.BloodMoon);
+			panelInvasion.Append(buttonBloodMoon);
+
+			UIButton buttonPumpkinMoon = new UIButton(Main.extraTexture[12]);
+			buttonPumpkinMoon.Width.Pixels = 40;
+			buttonPumpkinMoon.Height.Pixels = 40;
+			buttonPumpkinMoon.Left.Pixels = 104;
+			buttonPumpkinMoon.Top.Pixels = 36;
+			buttonPumpkinMoon.HoverText += () => "Start Pumpkin Moon";
+			buttonPumpkinMoon.OnClick += (a, b) => Utility.StartEvent(Events.PumpkinMoon);
+			panelInvasion.Append(buttonPumpkinMoon);
+
+			UIButton buttonFrostMoon = new UIButton(Main.extraTexture[8]);
+			buttonFrostMoon.Width.Pixels = 40;
+			buttonFrostMoon.Height.Pixels = 40;
+			buttonFrostMoon.Left.Pixels = 152;
+			buttonFrostMoon.Top.Pixels = 36;
+			buttonFrostMoon.HoverText += () => "Start Frost Moon";
+			buttonFrostMoon.OnClick += (a, b) => Utility.StartEvent(Events.FrostMoon);
+			panelInvasion.Append(buttonFrostMoon);
+
+			UIButton buttonSolarEclipse = new UIButton(Main.itemTexture[ItemID.SolarTablet]);
+			buttonSolarEclipse.Width.Pixels = 40;
+			buttonSolarEclipse.Height.Pixels = 40;
+			buttonSolarEclipse.Left.Pixels = 200;
+			buttonSolarEclipse.Top.Pixels = 36;
+			buttonSolarEclipse.HoverText += () => "Start Solar Eclipse";
+			buttonSolarEclipse.OnClick += (a, b) => Utility.StartEvent(Events.SolarEclipse);
+			panelInvasion.Append(buttonSolarEclipse);
+
+			UIButton buttonLunarEvent = new UIButton(Main.itemTexture[ItemID.CelestialSigil]);
+			buttonLunarEvent.Width.Pixels = 40;
+			buttonLunarEvent.Height.Pixels = 40;
+			buttonLunarEvent.Left.Pixels = 248;
+			buttonLunarEvent.Top.Pixels = 36;
+			buttonLunarEvent.HoverText += () => "Start Lunar Event";
+			buttonLunarEvent.OnClick += (a, b) => Utility.StartEvent(Events.LunarEvent);
+			panelInvasion.Append(buttonLunarEvent);
+
+			UIButton buttonGoblinArmy = new UIButton(Main.extraTexture[9]);
+			buttonGoblinArmy.Width.Pixels = 40;
+			buttonGoblinArmy.Height.Pixels = 40;
+			buttonGoblinArmy.Left.Pixels = 8;
+			buttonGoblinArmy.Top.Pixels = 84;
+			buttonGoblinArmy.HoverText += () => "Start Goblin Army";
+			buttonGoblinArmy.OnClick += (a, b) => Utility.StartEvent(Events.GoblinArmy);
+			panelInvasion.Append(buttonGoblinArmy);
+
+			UIButton buttonPirates = new UIButton(Main.extraTexture[11]);
+			buttonPirates.Width.Pixels = 40;
+			buttonPirates.Height.Pixels = 40;
+			buttonPirates.Left.Pixels = 56;
+			buttonPirates.Top.Pixels = 84;
+			buttonPirates.HoverText += () => "Start Pirates";
+			buttonPirates.OnClick += (a, b) => Utility.StartEvent(Events.Pirates);
+			panelInvasion.Append(buttonPirates);
+
+			UIButton buttonFrostLegion = new UIButton(Main.extraTexture[7]);
+			buttonFrostLegion.Width.Pixels = 40;
+			buttonFrostLegion.Height.Pixels = 40;
+			buttonFrostLegion.Left.Pixels = 104;
+			buttonFrostLegion.Top.Pixels = 84;
+			buttonFrostLegion.HoverText += () => "Start Frost Legion";
+			buttonFrostLegion.OnClick += (a, b) => Utility.StartEvent(Events.FrostLegion);
+			panelInvasion.Append(buttonFrostLegion);
+
+			UIButton buttonMartians = new UIButton(Main.extraTexture[10]);
+			buttonMartians.Width.Pixels = 40;
+			buttonMartians.Height.Pixels = 40;
+			buttonMartians.Left.Pixels = 152;
+			buttonMartians.Top.Pixels = 84;
+			buttonMartians.HoverText += () => "Start Martian Madness";
+			buttonMartians.OnClick += (a, b) => Utility.StartEvent(Events.Martians);
+			panelInvasion.Append(buttonMartians);
+			#endregion
+
 			#region Other
 			UIPanel panelOther = new UIPanel();
 			panelOther.Width.Set(0f, 1f);
 			panelOther.Height.Pixels = 108;
-			panelOther.Top.Pixels = 92;
+			panelOther.Top.Pixels = 232;
 			panelOther.SetPadding(0);
 			panelEntity.Append(panelOther);
 
@@ -503,10 +609,7 @@ namespace WhatsThis.UI
 			buttonToggleGravestones.Left.Pixels = 56;
 			buttonToggleGravestones.Top.Pixels = 60;
 			buttonToggleGravestones.HoverText += () => GravestonesToggled ? "Disable gravestones" : "Enable gravestones";
-			buttonToggleGravestones.OnClick += (a, b) =>
-			{
-				GravestonesToggled = !GravestonesToggled;
-			};
+			buttonToggleGravestones.OnClick += (a, b) => { GravestonesToggled = !GravestonesToggled; };
 			panelOther.Append(buttonToggleGravestones);
 
 			UIButton buttonSpawnPoint = new UIButton(Main.itemTexture[ItemID.Bed]);
@@ -635,7 +738,6 @@ namespace WhatsThis.UI
 		private void SortClick(UIMouseEvent evt, UIElement element)
 		{
 			sortMode = sortModes.ElementAt(buttonSortMode.index).Key;
-			buttonSortMode.HoverText = sortMode;
 
 			gridItems.UpdateOrder();
 			gridItems.RecalculateChildren();
@@ -678,31 +780,6 @@ namespace WhatsThis.UI
 			//}
 		}
 
-		public void QueryContainers()
-		{
-			//if (!inputItems.focused)
-			//{
-			//	WhatsThis.Instance.foundContainers.Clear();
-
-			//	Mod ContainerLib = ModLoader.GetMod("ContainerLib2");
-
-			//	if (ContainerLib != null)
-			//	{
-			//		foreach (Point16 position in TileEntity.ByPosition.Keys)
-			//		{
-			//			if ((bool)ContainerLib.Call("IsContainer", position) && ((List<Item>)ContainerLib.Call("GetInventory", position)).Any(x => x.type == Main.HoverItem.type)) WhatsThis.Instance.foundContainers.Add(position);
-			//		}
-
-			//		for (int i = 0; i < Main.chest.Length; i++)
-			//		{
-			//			if (Main.chest[i] != null && Main.chest[i].item.Any(x => x.type == Main.HoverItem.type)) WhatsThis.Instance.foundContainers.Add(new Point16(Main.chest[i].x, Main.chest[i].y));
-			//		}
-
-			//		if (WhatsThis.Instance.foundContainers.Any()) WhatsThis.Instance.timer = 300;
-			//	}
-			//}
-		}
-
 		public void RecalculatePanels()
 		{
 			CalculatedStyle dimensions = panelMain.GetDimensions();
@@ -725,7 +802,6 @@ namespace WhatsThis.UI
 		}
 
 		#region Dragging & Resizing
-		public bool resizing;
 		public override void DragStart(UIMouseEvent evt, UIElement listeningElement)
 		{
 			if (evt.Target != panelMain) return;

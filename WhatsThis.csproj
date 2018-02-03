@@ -71,6 +71,7 @@
   <ItemGroup>
     <Compile Include="Global\WTNPC.cs" />
     <Compile Include="Global\WTProjectile.cs" />
+    <Compile Include="Global\WTWorld.cs" />
     <Compile Include="Global\WTWall.cs" />
     <Compile Include="UI\BrowserUI.cs" />
     <Compile Include="UI\RecipeUI.cs" />
@@ -82,7 +83,7 @@
     <Compile Include="Utility.cs" />
     <Compile Include="WhatsThis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WTPlayer.cs" />
+    <Compile Include="Global\WTPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="build.txt" />

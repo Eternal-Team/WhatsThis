@@ -49,7 +49,6 @@ namespace WhatsThis.UI
 			Append(panelMain);
 
 			#region Heading
-
 			textTile.HAlign = 0.5f;
 			textTile.Top.Pixels = 16;
 			panelMain.Append(textTile);
@@ -67,7 +66,6 @@ namespace WhatsThis.UI
 			buttonTileForward.Top.Pixels = 8;
 			buttonTileForward.OnClick += TileForward;
 			panelMain.Append(buttonTileForward);
-
 			#endregion
 
 			panelRecipe.Width.Set(-16, 1);

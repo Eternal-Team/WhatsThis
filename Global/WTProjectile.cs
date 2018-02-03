@@ -16,8 +16,8 @@ namespace WhatsThis.Global
 			ProjectileID.Headstone,
 			ProjectileID.Gravestone,
 			ProjectileID.Obelisk,
-			ProjectileID.RichGravestone1, ProjectileID.RichGravestone2,ProjectileID.RichGravestone3,
-			ProjectileID.RichGravestone4, ProjectileID.RichGravestone5,
+			ProjectileID.RichGravestone1, ProjectileID.RichGravestone2, ProjectileID.RichGravestone3,
+			ProjectileID.RichGravestone4, ProjectileID.RichGravestone5
 		};
 
 		public override bool Autoload(ref string name) => true;
