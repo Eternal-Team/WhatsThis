@@ -9,7 +9,8 @@ using Terraria.UI;
 using TheOneLibrary.Base.UI;
 using TheOneLibrary.Recipe;
 using TheOneLibrary.UI.Elements;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
+using WhatsThis.UI.Elements;
 
 namespace WhatsThis.UI
 {

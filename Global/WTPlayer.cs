@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
 using WhatsThis.UI;
 
 namespace WhatsThis.Global

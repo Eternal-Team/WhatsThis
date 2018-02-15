@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Terraria;
 using Terraria.Graphics;
 using Terraria.ID;
@@ -12,8 +13,9 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using TheOneLibrary.Base;
 using TheOneLibrary.Recipe;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
 using WhatsThis.UI;
+using WhatsThis.UI.Elements;
 
 namespace WhatsThis
 {
@@ -28,6 +30,12 @@ namespace WhatsThis
 
 		public RecipeUI RecipeUI;
 		public UserInterface IRecipeUI;
+
+		public CheatUI CheatUI;
+		public UserInterface ICheatUI;
+
+		public MobUI MobUI;
+		public UserInterface IMobUI;
 
 		[Null] public static ModHotKey OpenBrowser;
 		[Null] public static ModHotKey ShowRecipe;
@@ -76,12 +84,6 @@ namespace WhatsThis
 
 				IBrowserUI = new UserInterface();
 				BrowserUI = new BrowserUI();
-
-				BrowserUI.InitCategories();
-				BrowserUI.InitSortModes();
-				BrowserUI.InitCheatButtons();
-				BrowserUI.InitPanels();
-
 				BrowserUI.Activate();
 				IBrowserUI.SetState(BrowserUI);
 
@@ -89,6 +91,17 @@ namespace WhatsThis
 				RecipeUI = new RecipeUI();
 				RecipeUI.Activate();
 				IRecipeUI.SetState(RecipeUI);
+
+				ICheatUI = new UserInterface();
+				CheatUI = new CheatUI();
+				CheatUI.Activate();
+				ICheatUI.SetState(CheatUI);
+
+				IMobUI = new UserInterface();
+				MobUI = new MobUI();
+				MobUI.Activate();
+				IMobUI.SetState(MobUI);
+				MobUI.visible = true;
 			}
 		}
 
@@ -106,6 +119,15 @@ namespace WhatsThis
 
 			BrowserUI.PopulateCategories();
 			BrowserUI.PopulateMods();
+
+			for (int i = 1; i < NPCLoader.NPCCount; i++)
+			{
+				NPC npc = new NPC();
+				npc.SetDefaults(i);
+
+				UIMobIcon slot = new UIMobIcon(npc);
+				MobUI.gridMobs.Add(slot);
+			}
 		}
 
 		public override void Unload()
@@ -125,22 +147,28 @@ namespace WhatsThis
 		{
 			BrowserUI.visible = false;
 			RecipeUI.visible = false;
+			CheatUI.visible = false;
 		}
 
+		private Stopwatch UIDrawTime = new Stopwatch();
 		public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
 		{
-			int InventoryIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Inventory"));
+			int HotbarIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Hotbar"));
 
-			if (InventoryIndex != -1)
+			if (HotbarIndex != -1)
 			{
 				if (BrowserUI.visible)
 				{
-					layers.Insert(InventoryIndex + 1, new LegacyGameInterfaceLayer(
+					layers.Insert(HotbarIndex + 1, new LegacyGameInterfaceLayer(
 						"WhatsThis: Browser",
 						delegate
 						{
+							UIDrawTime.Restart();
 							IBrowserUI.Update(Main._drawInterfaceGameTime);
 							BrowserUI.Draw(Main.spriteBatch);
+							UIDrawTime.Stop();
+
+							Utils.DrawBorderStringFourWay(Main.spriteBatch, Main.fontMouseText, "Browser DrawTime: " + UIDrawTime.ElapsedMilliseconds, 16, 120, Color.Red, Color.Black, Vector2.Zero);
 
 							return true;
 						}, InterfaceScaleType.UI));
@@ -148,12 +176,50 @@ namespace WhatsThis
 
 				if (RecipeUI.visible)
 				{
-					layers.Insert(InventoryIndex + 1, new LegacyGameInterfaceLayer(
+					layers.Insert(HotbarIndex + 1, new LegacyGameInterfaceLayer(
 						"WhatsThis: Recipe",
 						delegate
 						{
+							UIDrawTime.Restart();
 							IRecipeUI.Update(Main._drawInterfaceGameTime);
 							RecipeUI.Draw(Main.spriteBatch);
+							UIDrawTime.Stop();
+
+							Utils.DrawBorderStringFourWay(Main.spriteBatch, Main.fontMouseText, "Recipe DrawTime: " + UIDrawTime.ElapsedMilliseconds, 16, 150, Color.Red, Color.Black, Vector2.Zero);
+
+							return true;
+						}, InterfaceScaleType.UI));
+				}
+
+				if (CheatUI.visible)
+				{
+					layers.Insert(HotbarIndex + 1, new LegacyGameInterfaceLayer(
+						"WhatsThis: Cheat",
+						delegate
+						{
+							UIDrawTime.Restart();
+							ICheatUI.Update(Main._drawInterfaceGameTime);
+							CheatUI.Draw(Main.spriteBatch);
+							UIDrawTime.Stop();
+
+							Utils.DrawBorderStringFourWay(Main.spriteBatch, Main.fontMouseText, "Cheat DrawTime: " + UIDrawTime.ElapsedMilliseconds, 16, 180, Color.Red, Color.Black, Vector2.Zero);
+
+							return true;
+						}, InterfaceScaleType.UI));
+				}
+
+				if (MobUI.visible)
+				{
+					layers.Insert(HotbarIndex + 1, new LegacyGameInterfaceLayer(
+						"WhatsThis: Mob",
+						delegate
+						{
+							UIDrawTime.Restart();
+							IMobUI.Update(Main._drawInterfaceGameTime);
+							MobUI.Draw(Main.spriteBatch);
+							UIDrawTime.Stop();
+
+							Utils.DrawBorderStringFourWay(Main.spriteBatch, Main.fontMouseText, "Mob DrawTime: " + UIDrawTime.ElapsedMilliseconds, 16, 210, Color.Red, Color.Black, Vector2.Zero);
 
 							return true;
 						}, InterfaceScaleType.UI));

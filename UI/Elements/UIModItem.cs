@@ -6,9 +6,9 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using TheOneLibrary.Base.UI;
 using TheOneLibrary.UI.Elements;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
 
-namespace WhatsThis.UI
+namespace WhatsThis.UI.Elements
 {
 	public class UIModItem : BaseElement
 	{

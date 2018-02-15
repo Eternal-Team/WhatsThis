@@ -7,7 +7,7 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 using TheOneLibrary.Storage;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
 
 namespace WhatsThis.Global
 {

@@ -5,9 +5,9 @@ using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using TheOneLibrary.UI.Elements;
-using TheOneLibrary.Utility;
+using TheOneLibrary.Utils;
 
-namespace WhatsThis.UI
+namespace WhatsThis.UI.Elements
 {
 	public class UIBrowserGrid : UIElement
 	{

@@ -9,7 +9,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using TheOneLibrary.UI.Elements;
 
-namespace WhatsThis.UI
+namespace WhatsThis.UI.Elements
 {
 	public class UIBrowserIcon : BaseElement
 	{

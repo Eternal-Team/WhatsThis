@@ -49,6 +49,24 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Server|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Server\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Server|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Server\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
@@ -74,12 +92,15 @@
     <Compile Include="Global\WTWorld.cs" />
     <Compile Include="Global\WTWall.cs" />
     <Compile Include="UI\BrowserUI.cs" />
+    <Compile Include="UI\CheatUI.cs" />
+    <Compile Include="UI\Elements\UIMobIcon.cs" />
+    <Compile Include="UI\MobUI.cs" />
     <Compile Include="UI\RecipeUI.cs" />
-    <Compile Include="UI\UIBrowserIcon.cs" />
-    <Compile Include="UI\UIBrowserGrid.cs" />
-    <Compile Include="UI\UICategoryItem.cs" />
-    <Compile Include="UI\UIIngredient.cs" />
-    <Compile Include="UI\UIModItem.cs" />
+    <Compile Include="UI\Elements\UIBrowserIcon.cs" />
+    <Compile Include="UI\Elements\UIBrowserGrid.cs" />
+    <Compile Include="UI\Elements\UICategoryItem.cs" />
+    <Compile Include="UI\Elements\UIIngredient.cs" />
+    <Compile Include="UI\Elements\UIModItem.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WhatsThis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
