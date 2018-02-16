@@ -16,7 +16,7 @@ namespace WhatsThis.UI.Elements
 		public Texture2D iconTexture;
 
 		public Color textColor = Color.White;
-		public Color bgColor = BaseUI.panelColor;
+		public Color bgColor = BaseUI.PanelColor;
 
 		public UIModItem(Mod mod)
 		{
@@ -33,7 +33,7 @@ namespace WhatsThis.UI.Elements
 
 		public void SetActive()
 		{
-			bgColor = BaseUI.panelColor;
+			bgColor = BaseUI.PanelColor;
 			textColor = Color.White;
 		}
 

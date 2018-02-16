@@ -93,6 +93,7 @@
     <Compile Include="Global\WTWall.cs" />
     <Compile Include="UI\BrowserUI.cs" />
     <Compile Include="UI\CheatUI.cs" />
+    <Compile Include="UI\Elements\UINPCGrid.cs" />
     <Compile Include="UI\Elements\UIMobIcon.cs" />
     <Compile Include="UI\MobUI.cs" />
     <Compile Include="UI\RecipeUI.cs" />

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.UI;
@@ -22,21 +23,25 @@ namespace WhatsThis.UI.Elements
 
 		public override void Click(UIMouseEvent evt)
 		{
-			int x = (int)Main.LocalPlayer.Bottom.X;
-			int y = (int)Main.LocalPlayer.Bottom.Y - 320;
+			if (WhatsThis.Instance.MobUI.cheatMode)
+			{
+				int x = (int)Main.LocalPlayer.Bottom.X;
+				int y = (int)Main.LocalPlayer.Bottom.Y - 320;
 
-			NPC.NewNPC(x, y, npc.type);
+				NPC.NewNPC(x, y, npc.type); 
+			}
+			// else display drops in RecipeUI
 		}
 
-		public override int CompareTo(object obj) => npc.type.CompareTo(((UIMobIcon)obj).npc.type);
+		public override int CompareTo(object obj) => MobUI.sortModes[WhatsThis.Instance.MobUI.sortMode].Invoke(npc, (obj as UIMobIcon)?.npc);
 
 		public override bool PassFilters()
 		{
 			bool result = true;
 
-			//if (WhatsThis.Instance.BrowserUI.currentMods.Count > 0) result &= npc.modItem != null && WhatsThis.Instance.BrowserUI.currentMods.Contains(npc.modItem.mod.Name);
+			if (WhatsThis.Instance.MobUI.currentMods.Count > 0) result &= npc.modNPC != null && WhatsThis.Instance.MobUI.currentMods.Contains(npc.modNPC.mod.Name);
 
-			//if (WhatsThis.Instance.BrowserUI.currentCategories.Count > 0) result &= WhatsThis.Instance.BrowserUI.currentCategories.Any(x => BrowserUI.categories[x].Invoke(npc));
+			if (WhatsThis.Instance.MobUI.currentCategories.Count > 0) result &= WhatsThis.Instance.MobUI.currentCategories.Any(x => MobUI.categories[x].Invoke(npc));
 
 			if (WhatsThis.Instance.MobUI.inputMobs.GetText().Length > 0) result &= WhatsThis.Instance.MobUI.regex.Matches(Lang.GetNPCNameValue(npc.type).ToLower()).Count > 0;
 
@@ -83,9 +88,6 @@ namespace WhatsThis.UI.Elements
 			Color color = npc.color != Color.Transparent ? new Color(npc.color.R, npc.color.G, npc.color.B, 255f) : new Color(1f, 1f, 1f);
 
 			Main.spriteBatch.Draw(npcTexture, drawPosition, rectangle, color, 0, Vector2.Zero, drawScale, SpriteEffects.None, 0);
-
-			// todo: draw NPC stats
-			if (IsMouseHovering) Main.hoverItemName = Lang.GetNPCNameValue(npc.type);
 		}
 	}
 }

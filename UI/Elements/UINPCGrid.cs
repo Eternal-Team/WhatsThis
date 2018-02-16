@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
+using Terraria.GameInput;
+using Terraria.ID;
 using Terraria.UI;
+using TheOneLibrary.Base.UI;
 using TheOneLibrary.UI.Elements;
 using TheOneLibrary.Utils;
 
 namespace WhatsThis.UI.Elements
 {
-	public class UIBrowserGrid : UIElement
+	public class UINPCGrid : UIElement
 	{
 		public delegate bool ElementSearchMethod(BaseElement element);
 
@@ -40,7 +45,7 @@ namespace WhatsThis.UI.Elements
 
 		public int columns = 1;
 
-		public UIBrowserGrid(int columns = 1)
+		public UINPCGrid(int columns = 1)
 		{
 			this.columns = columns;
 			innerList.OverflowHidden = false;
@@ -67,14 +72,7 @@ namespace WhatsThis.UI.Elements
 				}
 			}
 		}
-
-		public override void Update(GameTime gameTime)
-		{
-			for (int i = 0; i < items.Count; i++) if (items[i].visible) items[i].Update(gameTime);
-
-			base.Update(gameTime);
-		}
-
+		
 		public virtual void Add(BaseElement item)
 		{
 			items.Add(item);
@@ -174,11 +172,83 @@ namespace WhatsThis.UI.Elements
 			return list;
 		}
 
+		private NPC npc;
+		private List<Tuple<Texture2D, object, Color>> tooltip;
+		public override void MouseOver(UIMouseEvent evt)
+		{
+			if (evt.Target is UIMobIcon)
+			{
+				npc = ((UIMobIcon)evt.Target).npc;
+				tooltip = GetTooltip(npc).ToList();
+			}
+		}
+
+		public override void MouseOut(UIMouseEvent evt) => npc = null;
+
+		public IEnumerable<Tuple<Texture2D, object, Color>> GetTooltip(NPC npc)
+		{
+			yield return Tuple.Create<Texture2D, object, Color>(null, Lang.GetNPCNameValue(npc.type), Color.White);
+			yield return Tuple.Create<Texture2D, object, Color>(Main.heartTexture, "Max Health: " + npc.lifeMax, Color.White);
+			yield return Tuple.Create<Texture2D, object, Color>(Main.itemTexture[ItemID.CopperShortsword], "Damage: " + npc.damage, Color.White);
+			yield return Tuple.Create<Texture2D, object, Color>(Main.extraTexture[58], "Defense: " + npc.defense, Color.White);
+			yield return Tuple.Create<Texture2D, object, Color>(Main.itemTexture[ItemID.CobaltShield], "KB Resistance: " + npc.knockBackResist, Color.White);
+			yield return Tuple.Create<Texture2D, object, Color>(null, npc.friendly ? "Friendly" : "Hostile", Color.White);
+			if (npc.boss) yield return Tuple.Create<Texture2D, object, Color>(null, "Boss", Main.DiscoColor);
+			if (npc.townNPC) yield return Tuple.Create<Texture2D, object, Color>(null, "Town NPC", Color.LightBlue);
+		}
+
+		public void DrawPanel(SpriteBatch spriteBatch)
+		{
+			if (npc != null)
+			{
+				Main.LocalPlayer.showItemIcon = false;
+				Main.ItemIconCacheUpdate(0);
+				Main.mouseText = true;
+
+				PlayerInput.SetZoom_UI();
+				int hackedMouseX = Main.mouseX;
+				int hackedMouseY = Main.mouseY;
+				PlayerInput.SetZoom_UI();
+				PlayerInput.SetZoom_Test();
+
+				int posX = Main.mouseX + 10;
+				int posY = Main.mouseY + 10;
+				if (hackedMouseX != -1 && hackedMouseY != -1)
+				{
+					posX = hackedMouseX + 10;
+					posY = hackedMouseY + 10;
+				}
+				if (Main.ThickMouse)
+				{
+					posX += 6;
+					posY += 6;
+				}
+
+				Vector2 vector = new Vector2(40 + tooltip.Select(x => x.Item2.ToString().Measure().X).Max(), tooltip.Count * 20 + (tooltip.Count + 1) * 8);
+
+				CalculatedStyle dimensions = GetDimensions();
+
+				if (posX + vector.X + 4f > dimensions.X + dimensions.Width) posX = (int)(dimensions.X + dimensions.Width - vector.X - 4f);
+				if (posY + vector.Y + 4f > dimensions.Y + dimensions.Height) posY = (int)(dimensions.Y + dimensions.Height - vector.Y - 4f);
+
+				spriteBatch.DrawPanel(new Rectangle(posX, posY, (int)vector.X, (int)vector.Y), TheOneLibrary.TheOneLibrary.backgroundTexture, BaseUI.PanelColor * 1.3f);
+				spriteBatch.DrawPanel(new Rectangle(posX, posY, (int)vector.X, (int)vector.Y), TheOneLibrary.TheOneLibrary.borderTexture, Color.Black);
+
+				for (int i = 0; i < tooltip.Count; i++)
+				{
+					var tuple = tooltip[i];
+
+					if (tuple.Item1 != null) spriteBatch.Draw(tuple.Item1, new Rectangle(posX + 8, posY + i * 20 + (i + 1) * 8, 16, 16), Color.White);
+					Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, tuple.Item2.ToString(), posX + 32, posY + i * 20 + (i + 1) * 8, tuple.Item3, Color.Black, Vector2.Zero);
+				}
+			}
+		}
+
 		public override void Draw(SpriteBatch spriteBatch)
 		{
 			spriteBatch.End();
 
-			RasterizerState state = new RasterizerState {ScissorTestEnable = true};
+			RasterizerState state = new RasterizerState { ScissorTestEnable = true };
 
 			Rectangle prevRect = spriteBatch.GraphicsDevice.ScissorRectangle;
 
@@ -187,7 +257,8 @@ namespace WhatsThis.UI.Elements
 			spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState, null, state, null, Main.UIScaleMatrix);
 
 			DrawSelf(spriteBatch);
-			typeof(UIInnerList).InvokeMethod<object>("DrawChildren", new object[] {spriteBatch}, innerList);
+			typeof(UIInnerList).InvokeMethod<object>("DrawChildren", new object[] { spriteBatch }, innerList);
+			DrawPanel(spriteBatch);
 
 			spriteBatch.End();
 			spriteBatch.GraphicsDevice.ScissorRectangle = prevRect;

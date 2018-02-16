@@ -128,6 +128,9 @@ namespace WhatsThis
 				UIMobIcon slot = new UIMobIcon(npc);
 				MobUI.gridMobs.Add(slot);
 			}
+
+			MobUI.PopulateCategories();
+			MobUI.PopulateMods();
 		}
 
 		public override void Unload()
@@ -135,6 +138,10 @@ namespace WhatsThis
 			BrowserUI.categories.Clear();
 			BrowserUI.sortModes.Clear();
 			BrowserUI.sidePanels.Clear();
+
+			MobUI.categories.Clear();
+			MobUI.sortModes.Clear();
+			MobUI.sidePanels.Clear();
 
 			textureSortMode.Clear();
 

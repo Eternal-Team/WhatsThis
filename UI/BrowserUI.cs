@@ -93,7 +93,7 @@ namespace WhatsThis.UI
 			panelMain.MaxHeight.Set(912f, 0f); // Max 19 rows
 			panelMain.Center();
 			panelMain.SetPadding(0);
-			panelMain.BackgroundColor = panelColor;
+			panelMain.BackgroundColor = PanelColor;
 			panelMain.OnMouseDown += DragStart;
 			panelMain.OnMouseUp += DragEnd;
 			Append(panelMain);

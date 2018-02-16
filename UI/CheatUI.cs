@@ -11,7 +11,7 @@ namespace WhatsThis.UI
 			panelMain.Height.Pixels = 648f;
 			panelMain.Center();
 			panelMain.SetPadding(0);
-			panelMain.BackgroundColor = panelColor;
+			panelMain.BackgroundColor = PanelColor;
 			panelMain.OnMouseDown += DragStart;
 			panelMain.OnMouseUp += DragEnd;
 			Append(panelMain);

@@ -13,7 +13,7 @@ namespace WhatsThis.UI.Elements
 	{
 		public string category;
 
-		public Color PanelColor = BaseUI.panelColor;
+		public Color PanelColor = BaseUI.PanelColor;
 		public Color TextColor = Color.White;
 
 		public UICategoryItem(string category)
@@ -29,7 +29,7 @@ namespace WhatsThis.UI.Elements
 
 		public void SetActive()
 		{
-			PanelColor = BaseUI.panelColor;
+			PanelColor = BaseUI.PanelColor;
 			TextColor = Color.White;
 		}
 
